@@ -1,3 +1,4 @@
+Copyright (c) 2018, Igor Varfolomeev
 Copyright (c) 2013, Andrew Smart
 Copyright (c) 2011, Joshua Dillon
 All rights reserved.
