@@ -1,18 +1,17 @@
 function demo_semaphore()
-% In this demo, each of n_users (8 by default) performs some work, that
-% consists of 3 steps.
+% In this demo each of 8 `parfor` loop iterations got 3 steps:
 %
 % # 1st step is time-consuming, but might be executed in parallel
 % # 2nd step is fast, but some limited resource is needed (e.g. a lot of RAM)
 % # 3rd step is just like first.
 %
-% In this demo, each of 8 workers need 1 GB of RAM on 2nd step, but only 2
-% workers are allowed to perform it simultaneously.   
+% Assuming that the parallel pool may have more than 2 workers, but only 2
+% workers are allowed to execute step2 simultaneously:
     
-    max_users = 2;
+    n_users = 2;
     timeout = 50;
     
-    sem_host = SemaphoreHost(max_users);    
+    sem_host = SemaphoreHost(n_users);    
     
     t0 = tic();
     parfor i=1:8

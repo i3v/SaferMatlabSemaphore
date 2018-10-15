@@ -1,20 +1,36 @@
 classdef SemaphoreHost < handle
-    % SEMAPHOREHOST grants access to SemaphoreUsers.
-    %
+    % SEMAPHOREHOST grants access to SemaphoreUsers.    
     % Creates a semaphore that allows at most N_USERS to pass in simultaneously. 
     %
-    % Limitations:
-    %  * Windows only   
-    %  * Does not work on a distributed multi-node cluster.    
-    %  * Underlying system objects are shared, accessible by any other process.
-    %  * Underlying system objects are not destroyed properly - e.g. there's a 
+    %%% Usage example:   
+    %
+    %     sem_host = SemaphoreHost(2);            
+    %     parfor i=1:8    
+    %         some_work(i)
+    %
+    %         sem_usr = sem_host.wait(timeout);             
+    %         critical_section(i);    
+    %         sem_usr.post();
+    %         
+    %         more_work(i)    
+    %     end
+    %
+    %%% Limitations:
+    %    
+    % * Windows only           
+    % * Does not work on a distributed multi-node cluster.    
+    % * Underlying system objects are shared, accessible by any other process.
+    % * Underlying system objects are not destroyed properly - e.g. there's a 
     %    system resource (semaphore handles) leak.  Resources are only
     %    freed when Matlab process exits. This should not matter much in
     %    practice, unless you would create ~16,000,000 semaphores one by
-    %    one (in which case it would be a good idea to reuse the same one).
-    %    
-    %    More details about maximum number of handles:
-    %    https://blogs.technet.microsoft.com/markrussinovich/2009/09/29/pushing-the-limits-of-windows-handles/
+    %    one (in which case it would be a good idea to reuse the same one).                
+    %    <https://blogs.technet.microsoft.com/markrussinovich/2009/09/29/pushing-the-limits-of-windows-handles/ 
+    %    More details about maximum number of handles>.
+    % 
+    %
+    % SEE ALSO: demo_semaphore.m    
+    
     
     properties (SetAccess = private)
         semkey
@@ -24,14 +40,21 @@ classdef SemaphoreHost < handle
         function obj=SemaphoreHost(n_users, name, add_uniqueness)
             % Creates a semaphore that allows at most N_USERS to pass in simultaneously. 
             %
+            %% Usage:
+            %  
+            %  sem_host = SemaphoreHost(2);
+            %  sem_host = SemaphoreHost(1,'my_critical_section_1');
+            %  sem_host = SemaphoreHost(1,'my_critical_section_2', false);
+            %
             %% Inputs:
             %
             % * N_USERS - number of users that are allowed simultaneously
             % * NAME - [1 N] character vector. ~200 chars max.                        
             % * ADD_UNIQUENESS - logical scalar. If True, a pseudorandom
             %   part (based on time and pid) is added to the NAME. Default is True.
+                        
             
-            if ~exist('name','var')
+            if nargin < 2
                 name = 'unnamed'; 
                 add_uniqueness = true;
             else
@@ -40,9 +63,7 @@ classdef SemaphoreHost < handle
                         'The name should be a short character vector' );
             end
             
-            if ~exist('add_uniqueness','var')
-                add_uniqueness = true;
-            else
+            if nargin == 3                
                 assert( islogical(add_uniqueness) && isscalar(add_uniqueness),...
                         'SemaphoreHost:badAddUniqueness',...
                         'The add_uniqueness must be a logical scalar' );
@@ -76,8 +97,8 @@ classdef SemaphoreHost < handle
             %   (Even though this does not happen in practice.)
             % * the SemaphoreUser object, created here would automatically
             %   return ticket upon destruction.
-            
-            if ~exist('max_seconds','var')
+                        
+            if nargin<2
                 max_seconds=20;
             end
             
@@ -93,7 +114,7 @@ classdef SemaphoreHost < handle
             % Creates a new [1 N] char "unique ID", based on PID and time
             % To make sure 
             
-            if ~exist('name','var')
+            if nargin<1
                 name = 'unnamed';
             end
             
