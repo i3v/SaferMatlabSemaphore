@@ -102,6 +102,50 @@ classdef Test_Semaphore  < matlab.unittest.TestCase
             obj.verifyEqual(numel(unique({semphrA.semkey})),n);
         end
         
+        function two_args_case(obj)
+            % Test that 2-args case works OK, and creates unique ids.
+            n = 1e1;
+            
+            for i=1:n
+                semphrA(i) = SemaphoreHost(1,'somename'); %#ok<AGROW>
+            end
+            
+            obj.verifyEqual(numel(unique({semphrA.semkey})),n);
+        end
+        
+        function three_args_case_v1(obj)
+            % Test that 3-args case works OK with unique ids.
+            n = 1e1;
+            
+            for i=1:n
+                semphrA(i) = SemaphoreHost(1,'somename',true); %#ok<AGROW>
+            end
+            
+            obj.verifyEqual(numel(unique({semphrA.semkey})),n);          
+        end
+        
+        function three_args_case_v2(obj)
+            % Test that 3-args case works OK with non-unique ids.
+                        
+            uid_str = SemaphoreHost.new_unique_semkey('three_args_case_test');
+            semphr1 = SemaphoreHost(1,uid_str,false);
+            semphr2 = SemaphoreHost(9,uid_str,false);
+            
+            usr1 = semphr1.wait(1);   
+                        
+            % If lpName matches the name of an existing named semaphore
+            % object, the lInitialCount and lMaximumCount parameters are
+            % ignored because they have already been set during the
+            % creation process.            
+            % ( https://msdn.microsoft.com/en-us/library/ms919038.aspx )
+            %
+            % Thus, semphr1 and semphr2 point to the same semaphore, 
+            % so we expect 2nd user to timeout:
+            obj.verifyError(@() semphr2.wait(1),'MATLAB:semaphore:waitTimeout')
+            
+            delete(usr1);                                    
+        end
+        
     end
     
     methods (Static)
