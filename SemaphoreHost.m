@@ -55,15 +55,16 @@ classdef SemaphoreHost < handle
                         
             
             if nargin < 2
-                name = 'unnamed'; 
-                add_uniqueness = true;
+                name = 'unnamed';                 
             else
                 assert( ischar(name) && isvector(name) && length(name)<200,...
                         'SemaphoreHost:badName',...
                         'The name should be a short character vector' );
             end
             
-            if nargin == 3                
+            if nargin < 3
+                add_uniqueness = true;                
+            else
                 assert( islogical(add_uniqueness) && isscalar(add_uniqueness),...
                         'SemaphoreHost:badAddUniqueness',...
                         'The add_uniqueness must be a logical scalar' );
